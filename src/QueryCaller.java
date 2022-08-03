@@ -1,80 +1,63 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 public class QueryCaller {
-	
-	public void loadBuildingInfoQuery(String queryValueStr) {
+	private static final int BATCH_CLEAN_TIME = 500000;
+	public void loadBuildInfo(List<String> txtBuildInfos) {
 		Connection conn = DBConnector.getConnection();
-//		String[] queryValues = convertStrToStrList(queryValueStr);
-//		
-//		for(int i = 0 ; i < queryValues.length; i++) {
-//			System.out.println((i+1) +" : " + queryValues[i]);
-//		}
 		
 		try {
-			String[] queryValues = convertStrToStrList(queryValueStr);
+			PreparedStatement pstmt = conn.prepareStatement(BaseQuery.BUILD);
+			int buildsSize = txtBuildInfos.size();
 			
-			String baseQuery = 
-					"insert into kmig_bld("
-					+ "LEGL_DONG_CD, " //1
-					+ "SIDO_NM, " //2
-					+ "SGG_NM, " //3
-					+ "LEGL_UMD_NM, " //4
-					+ "GOLI_NM, " //5
-					+ "MUNT_YN, " //6 
-					+ "HNUM_ORGL_NUM, " //7
-					+ "HNUM_VICE_NUM, " //8
-					+ "ROAD_NM_CD_VAL, " //9 
-					+ "ROAD_NM, " //10
-					+ "UNG_YN, " //11
-					+ "CMPX_ORGL_NUM, " //12
-					+ "CMPX_VICE_NUM, " //13
-					+ "CMPL_RGST_CMPX_NM, " //14
-					+ "DTL_CMPX_NM, " //15
-					+ "CMPX_MGMT_NUM, " //16
-					+ "UMD_SEQ, " //17 
-					+ "HJD_DONG_CD, " //18
-					+ "HJD_DONG_NM, " //19
-					+ "POST_NUM, " //20
-					+ "POST_SEQC, " //21
-					+ "MANY_DELI_NM, " //22
-					+ "MOV_RSN_CD, " //23
-					+ "NOTI_DD, " //24
-					+ "BF_ROAD_NM_ADDR, " //25
-					+ "SGG_CMPX_NM, " //26
-					+ "JOIN_HOUSE_YN, " //27
-					+ "BAS_DIST_NUM, " //28
-					+ "DTL_ADDR_YN, " //29
-					+ "RMK1, " //30
-					+ "RMK2" //31
-					+ ") "
-					+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			
-			PreparedStatement pstmt = conn.prepareStatement(baseQuery);
-			
-			for(int i = 1 ; i <= 31; i++) {
-				String value = queryValues[i-1];
-				if(i == 7 || i == 8 || i ==12 || i == 13) {
-					if(value.length() != 0)
-						pstmt.setInt(i, Integer.parseInt(value));
-					else 
-						pstmt.setString(i, null);
-						
-				} else {
-					if(value.length() != 0)
-						pstmt.setString(i, value);
-					else 
-						pstmt.setString(i, null);
+			for(int n = 0 ; n < buildsSize ; n++) {
+				String buildInfos = txtBuildInfos.get(n);
+				String[] inputableBuildInfos = convertStrToStrList(buildInfos);
+				//í•œì¤„ì”© ìž…ë ¥
+				
+				for(int i = 1 ; i <= 31; i++) {
+					String inputableBuildInfo = inputableBuildInfos[i-1];
+					if(i == 7 || i == 8 || i ==12 || i == 13) {
+//						if(inputableBuildInfo.length() != 0)
+							pstmt.setInt(i, Integer.parseInt(inputableBuildInfo));
+//						else 
+//							pstmt.setString(i, null);
+							
+					} else {
+//						if(inputableBuildInfo.length() != 0)
+							pstmt.setString(i, inputableBuildInfo);
+//						else 
+//							pstmt.setString(i, null);
+					}
+				}
+				
+				pstmt.addBatch();
+				
+				pstmt.clearParameters();
+				
+				if((n % BATCH_CLEAN_TIME) == 0) {
+					pstmt.executeBatch();
+					
+					pstmt.clearBatch();
+					
+					conn.commit();
 				}
 			}
 			
-			pstmt.executeUpdate();
-		} catch(Throwable e) {
+			
+			
+			pstmt.executeBatch();
+			
+			pstmt.clearBatch();
+			
+			conn.commit();
+		} catch(SQLException e) {
 			if(conn != null) {
 				try {
 					conn.rollback();
-					System.out.println("query ½ÇÇà ¿À·ù ¹ß»ý : " +queryValueStr +"\n" + e);
+					System.out.println("query ì‹¤í–‰ ì‹¤íŒ¨ : " + e);
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -84,58 +67,50 @@ public class QueryCaller {
 		
 	}
 	
-	public void loadRoadInfoQuery(String queryValueStr) {
-
+	public void loadRoadInfo(List<String> txtRoadInfos) {
 		Connection conn = DBConnector.getConnection();
-//		String[] queryValues = convertStrToStrList(queryValueStr);
-//		
-//		for(int i = 0 ; i < queryValues.length; i++) {
-//			System.out.println((i+1) +" : " + queryValues[i]);
-//		}
 		
 		try {
-			String[] queryValues = convertStrToStrList(queryValueStr);
+			PreparedStatement pstmt = conn.prepareStatement(BaseQuery.ROAD);
+			int roadsSize = txtRoadInfos.size();
 			
-			String baseQuery = 
-					"insert into kmig_road_nm ("
-					+ "MGMT_NUM, " //1
-					+ "ROAD_NM_CD_VAL, " //2
-					+ "UMD_SEQ, " //3
-					+ "UNG_YN, " //4
-					+ "CMPX_ORGL_NUM, " //5
-					+ "CMPX_VICE_NUM, " //6 
-					+ "BAS_DIST_NUM, " //7
-					+ "CHG_RSN_CD, " //8
-					+ "NOTI_DD, " //9 
-					+ "BF_ROAD_NM_ADDR, " //10
-					+ "DTL_ADDR_GIVE_YN" //11
-					+ ") "
-					+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			for(int n = 0 ; n < roadsSize ; n++) {
+				String roadInfos = txtRoadInfos.get(n);
+				String[] inputableRoadInfos = convertStrToStrList(roadInfos);
+				//í•œì¤„ì”© ìž…ë ¥
 			
-			PreparedStatement pstmt = conn.prepareStatement(baseQuery);
-			
-			for(int i = 1 ; i <= 11; i++) {
-				String value = queryValues[i-1];
-				if(i == 5 || i == 6) {
-					if(value.length() != 0)
-						pstmt.setInt(i, Integer.parseInt(value));
-					else 
-						pstmt.setString(i, null);
-						
-				} else {
-					if(value.length() != 0)
-						pstmt.setString(i, value);
-					else 
-						pstmt.setString(i, null);
+				for(int i = 1 ; i <= 11; i++) {
+					String inputableRoadInfo = inputableRoadInfos[i-1];
+					if(i == 5 || i == 6) {
+//						if(inputableRoadInfo.length() != 0)
+							pstmt.setInt(i, Integer.parseInt(inputableRoadInfo));
+//						else 
+//							pstmt.setString(i, null);
+							
+					} else {
+//						if(inputableRoadInfo.length() != 0)
+							pstmt.setString(i, inputableRoadInfo);
+//						else 
+//							pstmt.setString(i, null);
+					}
 				}
+				pstmt.addBatch();
+				
+				pstmt.clearParameters();
 			}
+
 			
-			pstmt.executeUpdate();
+			
+			pstmt.executeBatch();
+			
+			pstmt.clearBatch();
+			
+			conn.commit();
 		} catch(Throwable e) {
 			if(conn != null) {
 				try {
 					conn.rollback();
-					System.out.println("query ½ÇÇà ¿À·ù ¹ß»ý : " +queryValueStr +"\n" + e);
+					System.out.println("query ì‹¤í–‰ ì‹¤íŒ¨ : " + e);
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -146,58 +121,50 @@ public class QueryCaller {
 		
 	}
 	
-	public void loadJibunInfoQuery(String queryValueStr) {
-
+	public void loadJibunInfo(List<String> txtJibunInfos) {
 		Connection conn = DBConnector.getConnection();
-//		String[] queryValues = convertStrToStrList(queryValueStr);
-//		
-//		for(int i = 0 ; i < queryValues.length; i++) {
-//			System.out.println((i+1) +" : " + queryValues[i]);
-//		}
 		
 		try {
-			String[] queryValues = convertStrToStrList(queryValueStr);
+			PreparedStatement pstmt = conn.prepareStatement(BaseQuery.JIBUN);
+			int jibunsSize = txtJibunInfos.size();
 			
-			String baseQuery = 
-					"insert into kmig_road_nm_hnum ("
-					+ "MGMT_NUM, " //1
-					+ "SEQC, " //2
-					+ "LEGL_DONG_CD, " //3
-					+ "SIDO_NM, " //4
-					+ "SGG_NM, " //5
-					+ "LEGL_UMD_NM, " //6 
-					+ "GOLI_NM, " //7
-					+ "MUNT_YN, " //8
-					+ "HNUM_ORGL_NUM, " //9 
-					+ "HNUM_VICE_NUM, " //10
-					+ "RPSN_YN" //11
-					+ ") "
-					+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			
-			PreparedStatement pstmt = conn.prepareStatement(baseQuery);
-			
-			for(int i = 1 ; i <= 11; i++) {
-				String value = queryValues[i-1];
-				if(i == 9 || i == 10) {
-					if(value.length() != 0)
-						pstmt.setInt(i, Integer.parseInt(value));
-					else 
-						pstmt.setString(i, null);
-						
-				} else {
-					if(value.length() != 0)
-						pstmt.setString(i, value);
-					else 
-						pstmt.setString(i, null);
+			for(int n = 0 ; n < jibunsSize ; n++) {
+				String jibunInfos = txtJibunInfos.get(n);
+				String[] inputableJibunInfos = convertStrToStrList(jibunInfos);
+				//í•œì¤„ì”© ìž…ë ¥
+				
+				for(int i = 1 ; i <= 11; i++) {
+					String inputableJibunInfo = inputableJibunInfos[i-1];
+					if(i == 9 || i == 10) {
+//						if(inputableJibunInfo.length() != 0)
+							pstmt.setInt(i, Integer.parseInt(inputableJibunInfo));
+//						else 
+//							pstmt.setString(i, null);
+							
+					} else {
+//						if(inputableJibunInfo.length() != 0)
+							pstmt.setString(i, inputableJibunInfo);
+//						else 
+//							pstmt.setString(i, null);
+					}
 				}
+				pstmt.addBatch();
+				
+				pstmt.clearParameters();
 			}
+
 			
-			pstmt.executeUpdate();
+			
+			pstmt.executeBatch();
+			
+			pstmt.clearBatch();
+			
+			conn.commit();
 		} catch(Throwable e) {
 			if(conn != null) {
 				try {
 					conn.rollback();
-					System.out.println("query ½ÇÇà ¿À·ù ¹ß»ý : " +queryValueStr +"\n" + e);
+					System.out.println("query ì‹¤í–‰ ì‹¤íŒ¨ : " + e);
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

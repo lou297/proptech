@@ -1,121 +1,84 @@
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.List;
 
 public class Run {
 	private static Connection conn;
-	private static final String DIRECTORY_PATH = "D:\\SD ¾÷¹«ÀÚ·á\\uploadFile";
-	private static final String PREFIX_BUILD = "build_";
-	private static final String PREFIX_ROAD = "ÁÖ¼Ò_";
-	private static final String PREFIX_JIBUN = "Áö¹ø_";
-	private static int totalSize = 0;
-	
+	private static int maxLen = 0;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+//		test();
 		init();
-		loadFileList();
+		loadFileInfo();
 		DBConnector.close();
-		System.out.println("Äõ¸® ½ÇÇà ¿Ï·á");
+		System.out.println("ì„±ê³µ");
 	}
 	
-	private static void loadFileList() {
-		File directory = new File(DIRECTORY_PATH);
-		
-		String [] filesName = directory.list();
-		
-		for(String fileName : filesName) {
-			if(fileName.startsWith(PREFIX_BUILD))
-				readFile(fileName, 0);
-//				System.out.println(fileName  +" -> °Ç¹°");
-			else if(fileName.startsWith(PREFIX_ROAD))
-				readFile(fileName, 1);
-//				System.out.println(fileName  +" -> ÁÖ¼Ò");
-			else if(fileName.startsWith(PREFIX_JIBUN))
-				readFile(fileName, 2);
-//				System.out.println(fileName  +" -> Áö¹ø");
-			else
-				System.out.println(fileName + " -> ¿À·ù");
-			if(fileName.startsWith(PREFIX_ROAD))
-				break;
-		}
-		System.out.println("ÁÖ¼Ò ÀüÃ¼ »çÀÌÁî : " + totalSize);
-	}
+//	private static void test() {
+//		String path = "D:\\LawAI\\project\\UploadRoadInfo";
+//		File directory = new File(path);
+//		
+//		String [] filesName = directory.list();
+//		
+//		for(String fileName : filesName) {
+//			try {
+//				System.out.println(fileName + " ì½ê¸° ì‹œì‘");
+//				List<String> fileStrLines = Files.readAllLines(Paths.get(path+"/"+fileName));
+//				for(String fileStr : fileStrLines) {
+//					String[] contents = fileStr.split("\\|", -1);
+//					
+//					for(String content : contents) {
+//						int contentSize = content.length();
+//						if(maxLen < contentSize) {
+//							maxLen = contentSize;
+//							System.out.println("ìµœëŒ€ ê¸¸ì´ : " + maxLen);
+//						}
+//					}
+//				}
+//				
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				System.out.println("íŒŒì¼ ì½ê¸° ì‹¤íŒ¨ : " + fileName);
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+//	
+	
 	
 	private static void init() {
 
 		conn = DBConnector.getConnection();
 	}
 	
-	
-	private static void readFile(String fileName, int fileType) {
-		try {
-			if(fileType != 1)
-				return;
-			List<String> fileStrLines = Files.readAllLines(Paths.get(DIRECTORY_PATH+"/"+fileName));
-			System.out.println(fileName +"ÀÇ Å©±â : " + fileStrLines.size());
-			totalSize += fileStrLines.size();
-			callQuery(fileStrLines, fileType);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("ÆÄÀÏ ÀĞ±â ½ÇÆĞ : " + fileName);
-			e.printStackTrace();
-		}
+	private static void loadFileInfo() {
+		int totalDataSize = 0;
 		
-//		switch(fileType) {
-//		case 0 :
-//			//°Ç¹°
-//			break;
-//		case 1 :
-//			//ÁÖ¼Ò
-//			break;
-//		case 2 :
-//			//Áö¹ø
-//			break;
-//		}
-	}
-	
-	private static void callQuery(List<String> fileStrLines, int fileType) {
-		
-		QueryCaller queryCaller = new QueryCaller();
-		
-		switch(fileType) {
-		case 0 :
-			//°Ç¹°
-			break;
-		case 1 :
-			//ÁÖ¼Ò
-			for(String data : fileStrLines) {
-				queryCaller.loadRoadInfoQuery(data);
+		String[] fileNames = FileReader.loadFileList();
+		int fileNumber = fileNames.length;
+		for(int i = 0 ; i < fileNumber; i++) {
+			String fileName = fileNames[i];
+			System.out.println(fileName +" ì½ê¸° ì‹œì‘");
+			
+			List<String> fileContents = FileReader.readFile(fileName);
+			System.out.println("í•´ë‹¹ íŒŒì¼ì— ë°ì´í„° " + fileContents.size() +"ê±´ì´ ì¡´ì¬í•©ë‹ˆë‹¤.");
+			totalDataSize += fileContents.size();
+			QueryCaller qc = new QueryCaller();
+			if(fileName.startsWith(FileReader.PREFIX_BUILD)) {
+				qc.loadBuildInfo(fileContents);
 			}
-			break;
-		case 2 :
-			//Áö¹ø
-			break;
+			else if(fileName.startsWith(FileReader.PREFIX_ROAD)) {
+				qc.loadRoadInfo(fileContents);
+			}
+			else if(fileName.startsWith(FileReader.PREFIX_JIBUN)) {
+				qc.loadJibunInfo(fileContents);
+			}
+			else
+				System.out.println(fileName + " -> ì˜¤ë¥˜");
+			System.out.println("db insert ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤. ("+(i+1)+"/"+fileNumber+")\n");
 		}
 		
-//		queryCaller.loadBuildingInfoQuery("2611010100|ºÎ»ê±¤¿ª½Ã|Áß±¸|¿µÁÖµ¿||0|60|23|261103006001|ÃÊ·®»ó·Î|0|1|4|||2611010100100600023003612|01|2611059000|¿µÁÖÁ¦1µ¿|48910|||||||0|48910|0||");
-//		queryCaller.loadRoadInfoQuery("4211025022103840000000001|421102218001|01|0|1877|0|24204||||0");
-//		queryCaller.loadJibunInfoQuery("2711010100100010000009433|1|2711010100|´ë±¸±¤¿ª½Ã|Áß±¸|µ¿ÀÎµ¿1°¡||0|2|1|1");
-		
-		try {
-			conn.commit();
-		} catch(Throwable t) {
-			System.out.println("commit ¿¡·¯ : " + t.getMessage());
-		} finally {
-//			try {
-//				if(conn != null) conn.close();
-//			} catch(Throwable t) {
-//				
-//			}
-			System.out.println("¿Ï·á");
-		}
+		System.out.println("ì „ì²´ íŒŒì¼ ëŒ€ìƒìœ¼ë¡œ ì´ " + totalDataSize +"ê±´ì´ InsertëìŠµë‹ˆë‹¤.");
 	}
 	
 	
