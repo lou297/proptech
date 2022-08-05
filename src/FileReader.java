@@ -6,10 +6,11 @@ import java.util.List;
 
 public class FileReader {
 //	private static final String DIRECTORY_PATH = "C:\\Users\\LeeJH\\Desktop\\SD\\업무자료\\주소 정보\\test2(빌딩)";
-	private static final String DIRECTORY_PATH = "D:\\LawAI\\project\\UploadRoadInfo\\export";
+	private static final String DIRECTORY_PATH = "D:\\LawAI\\project\\UploadRoadInfo\\bulkEtr";
 	public static final String PREFIX_BUILD = "build_";
 	public static final String PREFIX_ROAD = "주소_";
 	public static final String PREFIX_JIBUN = "지번_";
+	public static final String PREFIX_ROAD_ETR = "RNENTDATA_ALL_";
 
 	public static String[] loadFileList() {
 		File directory = new File(DIRECTORY_PATH);

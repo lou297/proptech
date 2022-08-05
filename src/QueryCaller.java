@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 public class QueryCaller {
@@ -92,6 +93,58 @@ public class QueryCaller {
 							pstmt.setString(i, inputableRoadInfo);
 //						else 
 //							pstmt.setString(i, null);
+					}
+				}
+				pstmt.addBatch();
+				
+				pstmt.clearParameters();
+			}
+
+			
+			
+			pstmt.executeBatch();
+			
+			pstmt.clearBatch();
+			
+			conn.commit();
+		} catch(Throwable e) {
+			if(conn != null) {
+				try {
+					conn.rollback();
+					System.out.println("query 실행 실패 : " + e);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+		
+		
+	}
+	
+	public void loadRoadEtrInfo(List<String> txtRoadEtrInfos) {
+		Connection conn = DBConnector.getConnection();
+		
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(BaseQuery.ROAD_ETR);
+			int roadEtrsSize = txtRoadEtrInfos.size();
+			
+			for(int n = 0 ; n < roadEtrsSize ; n++) {
+				String roadEtrInfos = txtRoadEtrInfos.get(n);
+				String[] inputableRoadEtrInfos = convertStrToStrList(roadEtrInfos);
+				//한줄씩 입력
+			
+				for(int i = 1 ; i <= 19; i++) {
+					String inputableRoadEtrInfo = inputableRoadEtrInfos[i-1];
+					if(i == 10 || i == 11 || i == 15) {
+							if(inputableRoadEtrInfo.length() != 0)
+								pstmt.setInt(i, Integer.parseInt(inputableRoadEtrInfo));
+							else {
+								if(i == 15)
+									pstmt.setNull(i, Types.DECIMAL);
+							}
+					} else {
+							pstmt.setString(i, inputableRoadEtrInfo);
 					}
 				}
 				pstmt.addBatch();

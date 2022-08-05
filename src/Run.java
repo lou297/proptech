@@ -70,6 +70,9 @@ public class Run {
 			else if(fileName.startsWith(FileReader.PREFIX_ROAD)) {
 				qc.loadRoadInfo(fileContents);
 			}
+			else if(fileName.startsWith(FileReader.PREFIX_ROAD_ETR)) {
+				qc.loadRoadEtrInfo(fileContents);
+			}
 			else if(fileName.startsWith(FileReader.PREFIX_JIBUN)) {
 				qc.loadJibunInfo(fileContents);
 			}

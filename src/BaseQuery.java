@@ -52,6 +52,31 @@ public class BaseQuery {
 					+ ") "
 					+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
+	public static final String ROAD_ETR =
+			"INSERT INTO kmig_road_nm_entr ("
+			+ "ROAD_NM_MGMT_NUM, "
+			+ "LEGL_DONG_CD, "
+			+ "SIDO_NM, "
+			+ "SGG_NM, "
+			+ "LEGL_UMD_NM, "
+			+ "GOLI_NM, "
+			+ "ROAD_NM_CD_VAL, "
+			+ "ROAD_NM, "
+			+ "UNG_YN, "
+			+ "CMPX_ORGL_NUM, "
+			+ "CMPX_VICE_NUM, "
+			+ "POST_NUM, "
+			+ "EFCT_OCCR_YMD, "
+			+ "MOV_RSN_CD, "
+			+ "ENTR_SEQ, "
+			+ "ENTR_CL_CD, "
+			+ "ENTR_TYP_CD, "
+			+ "ENTR_X_COOR_VAL, "
+			+ "ENTR_Y_COOR_VAL"
+			+ ") "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" + 
+			"";
+	
 	public static final String JIBUN = 
 			"insert into kmig_road_nm_hnum ("
 					+ "MGMT_NUM, " //1
