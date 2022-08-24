@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import query.BaseQuery;
+
 public class QueryCaller {
 	private static final int BATCH_CLEAN_TIME = 500000;
 	public void loadBuildInfo(List<String> txtBuildInfos) {

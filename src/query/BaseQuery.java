@@ -1,3 +1,4 @@
+package query;
 
 public class BaseQuery {
 	public static final String BUILD = 
